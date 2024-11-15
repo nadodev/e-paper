@@ -76,7 +76,7 @@ const router = createNextRoute(contract, {
         return { status: 400, body: { error: err.errors[0].message } };
       }
       console.error('Error updating document:', err);
-      return { status: 500, body: { error: 'Failed to update document' } };
+      return { status: 500, body: { error: 'Erro ao atualizar documento' } };
     }
   },
   deleteDocument: async ({ params }) => {
