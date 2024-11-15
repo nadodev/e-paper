@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
 import { api } from '@/lib/api/client'
-import type { Document } from '@/lib/api/contract'
+import type { Document, User } from '@/lib/api/contract'
 import { formatCurrency } from '@/lib/utils/format'
 import {
   Table,
@@ -16,6 +16,7 @@ import {
 import { DocumentActions } from './DocumentActions'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
 import { FileText } from 'lucide-react'
+import { DocumentFilters, type FilterValues } from './DocumentFilters'
 
 interface DocumentTableProps {
   onEdit: (document: Document) => void
@@ -30,6 +31,8 @@ export function DocumentTable({ onEdit }: DocumentTableProps) {
   const [selectedDocuments, setSelectedDocuments] = useState<Set<string>>(new Set())
   const [currentPage, setCurrentPage] = useState(1)
   const [viewingDocument, setViewingDocument] = useState<Document | null>(null)
+  const [users, setUsers] = useState<User[]>([])
+  const [filters, setFilters] = useState<FilterValues>({})
 
   const fetchDocuments = async () => {
     try {
@@ -97,10 +100,37 @@ export function DocumentTable({ onEdit }: DocumentTableProps) {
     fetchDocuments()
   }, [])
 
-  const filteredData = documents.filter((item) =>
-    item.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.emitente.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await api.getUsers();
+        if (response.status === 200) {
+          setUsers(response.body);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar usuários:', error)
+      }
+    }
+    fetchUsers()
+  }, [])
+
+  const filteredData = documents.filter((item) => {
+    const matchesSearch = item.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.emitente.toLowerCase().includes(searchTerm.toLowerCase())
+
+    const matchesEmitente = !filters.emitente || item.emitente === filters.emitente
+    
+    const matchesDate = (!filters.dateStart || new Date(item.data_criacao) >= new Date(filters.dateStart)) &&
+      (!filters.dateEnd || new Date(item.data_criacao) <= new Date(filters.dateEnd))
+    
+    const matchesValorTotal = (!filters.valorTotalMin || Number(item.valor_total_tributos) >= filters.valorTotalMin) &&
+      (!filters.valorTotalMax || Number(item.valor_total_tributos) <= filters.valorTotalMax)
+    
+    const matchesValorLiquido = (!filters.valorLiquidoMin || Number(item.valor_liquido) >= filters.valorLiquidoMin) &&
+      (!filters.valorLiquidoMax || Number(item.valor_liquido) <= filters.valorLiquidoMax)
+
+    return matchesSearch && matchesEmitente && matchesDate && matchesValorTotal && matchesValorLiquido
+  })
 
   // Cálculos para sumário
   const summary = {
@@ -128,7 +158,7 @@ export function DocumentTable({ onEdit }: DocumentTableProps) {
   }
 
   return (
-    <div className="space-y-4 w-full">
+    <div className="w-full space-y-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex gap-2 items-center">
           <Input
@@ -137,11 +167,16 @@ export function DocumentTable({ onEdit }: DocumentTableProps) {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
+          <DocumentFilters
+            users={users}
+            onFilter={setFilters}
+            onClear={() => setFilters({})}
+          />
           {selectedDocuments.size > 0 && (
             <Button 
               variant="outline"
               onClick={handleDeleteSelected}
-              className="text-red-600 whitespace-nowrap bg-red-50 border-red-200 hover:bg-red-100 hover:text-red-700"
+              className="whitespace-nowrap bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border-red-200"
             >
               Excluir Selecionados ({selectedDocuments.size})
             </Button>

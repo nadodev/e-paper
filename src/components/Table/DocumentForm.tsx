@@ -6,6 +6,7 @@ import { api } from '@/lib/api/client'
 import type { CreateDocumentInput, Document, User } from '@/lib/api/contract'
 import { formatCurrency, parseCurrency } from '@/lib/utils/format'
 import { FileText, X } from 'lucide-react'
+import { FileUpload } from '../ui/FileUpload'
 
 interface DocumentFormProps {
   initialData?: Document | null
@@ -71,7 +72,7 @@ export function DocumentForm({ initialData, onClose, onSuccess }: DocumentFormPr
   }, [initialData])
 
   const handleValorChange = (campo: 'valor_total_tributos' | 'valor_liquido', valor: string) => {
-    // Remove formataç��o para armazenar o valor numérico
+    // Remove formataço para armazenar o valor numérico
     const numeroLimpo = parseCurrency(valor)
     
     setFormData(prev => ({
@@ -84,50 +85,6 @@ export function DocumentForm({ initialData, onClose, onSuccess }: DocumentFormPr
       ...prev,
       [campo]: formatCurrency(numeroLimpo),
     }))
-  }
-
-  const handleArquivoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      // Validar tipo de arquivo
-      const tiposPermitidos = ['application/pdf', 'image/jpeg', 'image/png']
-      if (!tiposPermitidos.includes(file.type)) {
-        setError('Tipo de arquivo não permitido. Use PDF, JPEG ou PNG.')
-        return
-      }
-      // Validar tamanho (máximo 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        setError('Arquivo muito grande. Tamanho máximo: 5MB')
-        return
-      }
-
-      try {
-        setLoading(true)
-        const formData = new FormData()
-        formData.append('file', file)
-
-        const response = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        })
-
-        if (!response.ok) {
-          throw new Error('Erro ao fazer upload do arquivo')
-        }
-
-        const data = await response.json()
-        setFormData(prev => ({
-          ...prev,
-          arquivo_url: data.url
-        }))
-        setError(null)
-      } catch (error) {
-        console.error('Erro ao fazer upload:', error)
-        setError('Erro ao fazer upload do arquivo')
-      } finally {
-        setLoading(false)
-      }
-    }
   }
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -227,37 +184,12 @@ export function DocumentForm({ initialData, onClose, onSuccess }: DocumentFormPr
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Arquivo</label>
-            <div className="space-y-2">
-              <Input
-                type="file"
-                accept=".pdf,.jpg,.jpeg,.png"
-                onChange={handleArquivoChange}
-                className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
-              />
-              {formData.arquivo_url && (
-                <div className="flex items-center justify-between p-2 bg-gray-50 rounded-md">
-                  <a
-                    href={formData.arquivo_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center text-sm text-blue-600 hover:text-blue-700"
-                  >
-                    <FileText className="mr-2 h-4 w-4" />
-                    Ver arquivo
-                  </a>
-                  <button
-                    type="button"
-                    onClick={() => setFormData(prev => ({ ...prev, arquivo_url: null }))}
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              )}
-              <p className="text-xs text-gray-500">
-                Formatos aceitos: PDF, JPEG, PNG. Tamanho máximo: 5MB
-              </p>
-            </div>
+            <FileUpload
+              value={formData.arquivo_url}
+              onChange={(url) => setFormData(prev => ({ ...prev, arquivo_url: url }))}
+              onError={setError}
+              loading={loading}
+            />
           </div>
           <div className="flex justify-end space-x-2">
             <Button
