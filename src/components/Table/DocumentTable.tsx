@@ -23,7 +23,7 @@ interface DocumentTableProps {
   onEdit: (document: Document) => void
 }
 
-const ITEMS_PER_PAGE = 3;
+const ITEMS_PER_PAGE = 10;
 
 export function DocumentTable({ onEdit }: DocumentTableProps) {
   const [documents, setDocuments] = useState<Document[]>([])
@@ -163,7 +163,7 @@ export function DocumentTable({ onEdit }: DocumentTableProps) {
   return (
     <div className="w-full space-y-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex gap-2 items-center">
+        <div className="flex items-center gap-2">
           <Input
             placeholder="Buscar por código ou emitente..."
             className="max-w-sm"
@@ -179,7 +179,7 @@ export function DocumentTable({ onEdit }: DocumentTableProps) {
             <Button 
               variant="outline"
               onClick={handleDeleteSelected}
-              className="whitespace-nowrap bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border-red-200"
+              className="text-red-600 border-red-200 whitespace-nowrap bg-red-50 hover:bg-red-100 hover:text-red-700"
             >
               Excluir Selecionados ({selectedDocuments.size})
             </Button>
@@ -187,8 +187,8 @@ export function DocumentTable({ onEdit }: DocumentTableProps) {
         </div>
       </div>
 
-      <div className="w-full rounded-md border">
-        <div className="overflow-x-auto w-full">
+      <div className="w-full border rounded-md">
+        <div className="w-full overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -197,7 +197,7 @@ export function DocumentTable({ onEdit }: DocumentTableProps) {
                     type="checkbox"
                     checked={selectedDocuments.size === filteredData.length && filteredData.length > 0}
                     onChange={toggleSelectAll}
-                    className="rounded border-gray-300"
+                    className="border-gray-300 rounded"
                   />
                 </TableHead>
                 <TableHead>Código</TableHead>
@@ -216,7 +216,7 @@ export function DocumentTable({ onEdit }: DocumentTableProps) {
                       type="checkbox"
                       checked={selectedDocuments.has(item.id)}
                       onChange={() => toggleSelect(item.id)}
-                      className="rounded border-gray-300"
+                      className="border-gray-300 rounded"
                     />
                   </TableCell>
                   <TableCell>{item.codigo}</TableCell>
@@ -256,7 +256,7 @@ export function DocumentTable({ onEdit }: DocumentTableProps) {
         </div>
       </div>
 
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div className="text-sm text-gray-500">
           Mostrando {startIndex + 1} a {Math.min(startIndex + ITEMS_PER_PAGE, filteredData.length)} de {filteredData.length} resultados
         </div>
@@ -291,7 +291,7 @@ export function DocumentTable({ onEdit }: DocumentTableProps) {
       </div>
 
       {filteredData.length === 0 && (
-        <div className="py-10 w-full text-center">
+        <div className="w-full py-10 text-center">
           <p className="text-gray-500">Nenhum resultado encontrado</p>
         </div>
       )}
@@ -338,9 +338,9 @@ export function DocumentTable({ onEdit }: DocumentTableProps) {
                     href={viewingDocument.arquivo_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-1 inline-flex items-center text-blue-600 hover:text-blue-700"
+                    className="inline-flex items-center mt-1 text-blue-600 hover:text-blue-700"
                   >
-                    <FileText className="mr-1 h-4 w-4" />
+                    <FileText className="w-4 h-4 mr-1" />
                     Visualizar arquivo
                   </a>
                 </div>

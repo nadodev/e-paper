@@ -5,8 +5,8 @@ import { Button } from '../ui/button'
 import { api } from '@/lib/api/client'
 import type { CreateDocumentInput, Document, User } from '@/lib/api/contract'
 import { formatCurrency, parseCurrency } from '@/lib/utils/format'
-import { FileText, X } from 'lucide-react'
 import { FileUpload } from '../ui/FileUpload'
+import { toast } from 'sonner'
 
 interface DocumentFormProps {
   initialData?: Document | null
@@ -111,6 +111,9 @@ export function DocumentForm({ initialData, onClose, onSuccess }: DocumentFormPr
       }
 
       if (response.status === 200 || response.status === 201) {
+    
+        const message = initialData ? 'Documento atualizado com sucesso' : 'Documento criado com sucesso';
+        toast.success(message);
         onSuccess()
         onClose()
       } else {
