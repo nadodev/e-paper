@@ -51,32 +51,32 @@ const router = createNextRoute(contract, {
         return { status: 400, body: { error: 'Código já cadastrado' } };
       }
 
-      // Preparar os dados para atualização
-      const updateData = {
-        codigo: validatedData.codigo,
-        emitente: validatedData.emitente,
-        valor_total_tributos: new Decimal(validatedData.valor_total_tributos.toString()),
-        valor_liquido: new Decimal(validatedData.valor_liquido.toString()),
-        ultima_atualizacao: new Date(),
-      };
-
-      // Se arquivo_url foi fornecido, adiciona ao objeto de atualização
-      if (validatedData.arquivo_url !== undefined) {
-        Object.assign(updateData, { arquivo_url: validatedData.arquivo_url });
-      }
-
       const document = await prisma.document.update({
         where: { id: params.id },
-        data: updateData,
+        data: {
+          codigo: validatedData.codigo,
+          emitente: validatedData.emitente,
+          valor_total_tributos: new Decimal(validatedData.valor_total_tributos.toString()),
+          valor_liquido: new Decimal(validatedData.valor_liquido.toString()),
+          arquivo_url: validatedData.arquivo_url || null,
+          ultima_atualizacao: new Date(),
+        },
       });
 
-      return { status: 200, body: document };
+      return { 
+        status: 200, 
+        body: {
+          ...document,
+          valor_total_tributos: Number(document.valor_total_tributos),
+          valor_liquido: Number(document.valor_liquido),
+        }
+      };
     } catch (err) {
       if (err instanceof z.ZodError) {
         return { status: 400, body: { error: err.errors[0].message } };
       }
       console.error('Error updating document:', err);
-      return { status: 500, body: { error: 'Erro ao atualizar documento' } };
+      return { status: 500, body: { error: 'Failed to update document' } };
     }
   },
   deleteDocument: async ({ params }) => {
