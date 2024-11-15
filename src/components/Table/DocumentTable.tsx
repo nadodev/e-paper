@@ -1,5 +1,6 @@
 "use client"
 import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
 import { api } from '@/lib/api/client'
@@ -23,17 +24,31 @@ interface DocumentTableProps {
   onEdit: (document: Document) => void
 }
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 3;
 
 export function DocumentTable({ onEdit }: DocumentTableProps) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  
   const [documents, setDocuments] = useState<Document[]>([])
-  const [searchTerm, setSearchTerm] = useState('')
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '')
   const [isLoading, setIsLoading] = useState(true)
   const [selectedDocuments, setSelectedDocuments] = useState<Set<string>>(new Set())
-  const [currentPage, setCurrentPage] = useState(1)
+  const [currentPage, setCurrentPage] = useState(() => {
+    const page = searchParams.get('page')
+    return page ? parseInt(page) : 1
+  })
   const [viewingDocument, setViewingDocument] = useState<Document | null>(null)
   const [users, setUsers] = useState<User[]>([])
-  const [filters, setFilters] = useState<FilterValues>({})
+  const [filters, setFilters] = useState<FilterValues>(() => ({
+    dateStart: searchParams.get('dateStart') || undefined,
+    dateEnd: searchParams.get('dateEnd') || undefined,
+    emitente: searchParams.get('emitente') || undefined,
+    valorTotalMin: searchParams.get('valorTotalMin') ? Number(searchParams.get('valorTotalMin')) : undefined,
+    valorTotalMax: searchParams.get('valorTotalMax') ? Number(searchParams.get('valorTotalMax')) : undefined,
+    valorLiquidoMin: searchParams.get('valorLiquidoMin') ? Number(searchParams.get('valorLiquidoMin')) : undefined,
+    valorLiquidoMax: searchParams.get('valorLiquidoMax') ? Number(searchParams.get('valorLiquidoMax')) : undefined,
+  }))
 
   const fetchDocuments = async () => {
     try {
@@ -148,8 +163,63 @@ export function DocumentTable({ onEdit }: DocumentTableProps) {
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
   const paginatedData = filteredData.slice(startIndex, startIndex + ITEMS_PER_PAGE)
 
+  // Função para atualizar a URL
+  const updateQueryParams = (updates: Record<string, string | null>) => {
+    const params = new URLSearchParams(searchParams.toString())
+    
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === null) {
+        params.delete(key)
+      } else {
+        params.set(key, value)
+      }
+    })
+
+    // Remover parâmetros vazios
+    Array.from(params.entries()).forEach(([key, value]) => {
+      if (!value) params.delete(key)
+    })
+
+    router.push(`/documents?${params.toString()}`)
+  }
+
+  // Atualizar URL quando mudar a página
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
+    updateQueryParams({ page: page.toString() })
+  }
+
+  // Atualizar URL quando mudar a busca
+  const handleSearch = (value: string) => {
+    setSearchTerm(value)
+    setCurrentPage(1) // Resetar para primeira página
+    updateQueryParams({ 
+      search: value || null,
+      page: null // Remover página ao fazer nova busca
+    })
+  }
+
+  // Atualizar URL quando aplicar filtros
+  const handleFilter = (newFilters: FilterValues) => {
+    setFilters(newFilters)
+    setCurrentPage(1) // Resetar para primeira página
+    updateQueryParams({
+      dateStart: newFilters.dateStart || null,
+      dateEnd: newFilters.dateEnd || null,
+      emitente: newFilters.emitente || null,
+      valorTotalMin: newFilters.valorTotalMin?.toString() || null,
+      valorTotalMax: newFilters.valorTotalMax?.toString() || null,
+      valorLiquidoMin: newFilters.valorLiquidoMin?.toString() || null,
+      valorLiquidoMax: newFilters.valorLiquidoMax?.toString() || null,
+      page: null // Remover página ao aplicar filtros
+    })
+  }
+
+  // Limpar filtros e URL
+  const handleClearFilters = () => {
+    setFilters({})
+    setCurrentPage(1)
+    router.push('/documents') // Remover todos os query params
   }
 
   const handleView = (document: Document) => {
@@ -168,12 +238,13 @@ export function DocumentTable({ onEdit }: DocumentTableProps) {
             placeholder="Buscar por código ou emitente..."
             className="max-w-sm"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => handleSearch(e.target.value)}
           />
           <DocumentFilters
             users={users}
-            onFilter={setFilters}
-            onClear={() => setFilters({})}
+            onFilter={handleFilter}
+            onClear={handleClearFilters}
+            initialFilters={filters}
           />
           {selectedDocuments.size > 0 && (
             <Button 

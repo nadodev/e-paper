@@ -10,6 +10,7 @@ interface DocumentFiltersProps {
   users: User[]
   onFilter: (filters: FilterValues) => void
   onClear: () => void
+  initialFilters?: FilterValues
 }
 
 export interface FilterValues {
@@ -22,9 +23,9 @@ export interface FilterValues {
   valorLiquidoMax?: number
 }
 
-export function DocumentFilters({ users, onFilter, onClear }: DocumentFiltersProps) {
+export function DocumentFilters({ users, onFilter, onClear, initialFilters }: DocumentFiltersProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [filters, setFilters] = useState<FilterValues>({})
+  const [filters, setFilters] = useState<FilterValues>(initialFilters || {})
   const [formattedValues, setFormattedValues] = useState({
     valorTotalMin: 'R$ 0,00',
     valorTotalMax: 'R$ 0,00',
