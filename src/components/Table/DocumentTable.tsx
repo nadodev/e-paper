@@ -233,7 +233,7 @@ export function DocumentTable({ onEdit }: DocumentTableProps) {
   return (
     <div className="w-full space-y-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-end w-full gap-2">
           <Input
             placeholder="Buscar por código ou emitente..."
             className="max-w-sm"
