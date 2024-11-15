@@ -6,6 +6,7 @@ import { api } from '@/lib/api/client'
 import type { CreateDocumentInput, Document, User } from '@/lib/api/contract'
 import { formatCurrency, parseCurrency } from '@/lib/utils/format'
 import { FileText, X } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface DocumentFormProps {
   initialData?: Document | null
@@ -154,16 +155,19 @@ export function DocumentForm({ initialData, onClose, onSuccess }: DocumentFormPr
       }
 
       if (response.status === 200 || response.status === 201) {
+        toast.success(initialData ? 'Documento atualizado com sucesso!' : 'Documento criado com sucesso!')
         onSuccess()
         onClose()
       } else {
         const errorMessage = response.body && typeof response.body === 'object' && 'error' in response.body
           ? String(response.body.error)
           : 'Erro ao salvar documento';
+        toast.error(errorMessage)
         setError(errorMessage);
       }
     } catch (error) {
       console.error('Erro ao salvar documento:', error)
+      toast.error('Erro ao salvar documento')
       setError('Erro ao salvar documento')
     } finally {
       setLoading(false)
@@ -171,19 +175,19 @@ export function DocumentForm({ initialData, onClose, onSuccess }: DocumentFormPr
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-lg font-bold mb-4">
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="w-full max-w-md p-6 bg-white rounded-lg">
+        <h2 className="mb-4 text-lg font-bold">
           {initialData ? 'Editar Documento' : 'Novo Documento'}
         </h2>
         {error && (
-          <div className="bg-red-100 text-red-700 p-2 rounded-md mb-4">
+          <div className="p-2 mb-4 text-red-700 bg-red-100 rounded-md">
             {error}
           </div>
         )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Código</label>
+            <label className="block mb-1 text-sm font-medium">Código</label>
             <Input
               required
               value={formData.codigo}
@@ -192,10 +196,10 @@ export function DocumentForm({ initialData, onClose, onSuccess }: DocumentFormPr
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Emitente</label>
+            <label className="block mb-1 text-sm font-medium">Emitente</label>
             <select
               required
-              className="w-full rounded-md border p-2"
+              className="w-full p-2 border rounded-md"
               value={formData.emitente}
               onChange={(e) => setFormData(prev => ({ ...prev, emitente: e.target.value }))}
             >
@@ -208,7 +212,7 @@ export function DocumentForm({ initialData, onClose, onSuccess }: DocumentFormPr
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Valor Total Tributos</label>
+            <label className="block mb-1 text-sm font-medium">Valor Total Tributos</label>
             <Input
               required
               value={valoresFormatados.valor_total_tributos}
@@ -217,7 +221,7 @@ export function DocumentForm({ initialData, onClose, onSuccess }: DocumentFormPr
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Valor Líquido</label>
+            <label className="block mb-1 text-sm font-medium">Valor Líquido</label>
             <Input
               required
               value={valoresFormatados.valor_liquido}
@@ -226,7 +230,7 @@ export function DocumentForm({ initialData, onClose, onSuccess }: DocumentFormPr
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Arquivo</label>
+            <label className="block mb-1 text-sm font-medium">Arquivo</label>
             <div className="space-y-2">
               <Input
                 type="file"
@@ -235,14 +239,14 @@ export function DocumentForm({ initialData, onClose, onSuccess }: DocumentFormPr
                 className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
               />
               {formData.arquivo_url && (
-                <div className="flex items-center justify-between p-2 bg-gray-50 rounded-md">
+                <div className="flex items-center justify-between p-2 rounded-md bg-gray-50">
                   <a
                     href={formData.arquivo_url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center text-sm text-blue-600 hover:text-blue-700"
                   >
-                    <FileText className="mr-2 h-4 w-4" />
+                    <FileText className="w-4 h-4 mr-2" />
                     Ver arquivo
                   </a>
                   <button
@@ -250,7 +254,7 @@ export function DocumentForm({ initialData, onClose, onSuccess }: DocumentFormPr
                     onClick={() => setFormData(prev => ({ ...prev, arquivo_url: null }))}
                     className="text-gray-500 hover:text-gray-700"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="w-4 h-4" />
                   </button>
                 </div>
               )}
