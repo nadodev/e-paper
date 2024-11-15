@@ -17,6 +17,7 @@ import { DocumentActions } from './DocumentActions'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
 import { FileText } from 'lucide-react'
 import { DocumentFilters, type FilterValues } from './DocumentFilters'
+import { toast } from 'sonner'
 
 interface DocumentTableProps {
   onEdit: (document: Document) => void
@@ -53,12 +54,13 @@ export function DocumentTable({ onEdit }: DocumentTableProps) {
     try {
       const response = await api.deleteDocument({ params: { id } });
       if (response.status === 200) {
+        toast.success('Documento excluído com sucesso!')
         await fetchDocuments()
         setSelectedDocuments(new Set())
       }
     } catch (error) {
       console.error('Erro ao excluir documento:', error)
-      alert('Erro ao excluir documento')
+      toast.error('Erro ao excluir documento')
     }
   }
 
@@ -70,11 +72,12 @@ export function DocumentTable({ onEdit }: DocumentTableProps) {
         api.deleteDocument({ params: { id } })
       )
       await Promise.all(deletePromises)
+      toast.success(`${selectedDocuments.size} documento(s) excluídos com sucesso!`)
       await fetchDocuments()
       setSelectedDocuments(new Set())
     } catch (error) {
       console.error('Erro ao excluir documentos:', error)
-      alert('Erro ao excluir documentos')
+      toast.error('Erro ao excluir documentos')
     }
   }
 
