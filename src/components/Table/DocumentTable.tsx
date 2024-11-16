@@ -307,23 +307,49 @@ export function DocumentTable({ onEdit }: DocumentTableProps) {
                   </TableCell>
                 </TableRow>
               ))}
-              <TableRow className="font-medium bg-gray-50">
-                <TableCell colSpan={2} className="text-right">
-                  Total de Documentos: {summary.totalDocuments}
-                </TableCell>
-                <TableCell>
-                  Emitentes: {summary.uniqueEmitentes}
-                </TableCell>
-                <TableCell>
-                  {formatCurrency(summary.totalTributos)}
-                </TableCell>
-                <TableCell>
-                  {formatCurrency(summary.totalLiquido)}
-                </TableCell>
-                <TableCell colSpan={2} />
-              </TableRow>
+          
             </TableBody>
           </Table>
+          <div className="flex p-2 font-medium bg-gray-50 gap-[90px] pl-[50px] border-t border-t-[#E5E7EB]">
+                <div className="text-right">
+                   <div className='flex flex-col items-start text-[#3A424E] text-md'>
+                  <span className='block text-xs text-neutral-500'>
+                      Total:
+                    </span>
+                    <p>
+                    {summary.totalDocuments} documentos
+                    </p>
+                 </div>
+                </div>
+                <div>
+                    <div className='flex flex-col items-start text-[#3A424E] text-md'>
+                    <span className='block text-xs text-neutral-500'>
+                     nº de emitentes:
+                    </span>
+                    <p>
+                    {summary.uniqueEmitentes} emitentes
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <div className='flex flex-col items-start text-[#3A424E] text-md'>
+                <span className='block text-xs text-neutral-500'>
+                    Total Tributos:
+                  </span>
+                  <p>
+                  {formatCurrency(summary.totalTributos)}
+                  </p>
+                 </div>
+                </div>
+                <div>
+                  <div className='flex flex-col items-start text-[#3A424E] text-md'>
+                  <span className='block text-xs text-neutral-500'>
+                    Total Tributos:
+                  </span>
+                    {formatCurrency(summary.totalLiquido)}
+                  </div>
+                </div>
+              </div>
         </div>
       </div>
 
@@ -403,13 +429,12 @@ export function DocumentTable({ onEdit }: DocumentTableProps) {
                 </p>
               </div>
               {viewingDocument.arquivo_url != null && (
-                <div className="col-span-2">
-                  <label className="text-sm font-medium text-gray-500">Arquivo</label>
+                <div className="flex flex-col col-span-2">
                   <a
                     href={viewingDocument.arquivo_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center mt-1 text-blue-600 hover:text-blue-700"
+                    className="flex items-center pt-2 pb-2 pl-4 pr-4 mt-1 text-gray-100 bg-green-500 rounded max-w-max hover:bg-green-600"
                   >
                     <FileText className="w-4 h-4 mr-1" />
                     Visualizar arquivo

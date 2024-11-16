@@ -131,8 +131,8 @@ export function DocumentForm({ initialData, onClose, onSuccess }: DocumentFormPr
   }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="w-full max-w-md p-6 bg-white rounded-lg">
+    <div className="z-[400] fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="w-full max-w-lg p-6 bg-white rounded-lg">
         <h2 className="mb-4 text-lg font-bold">
           {initialData ? 'Editar Documento' : 'Novo Documento'}
         </h2>
@@ -186,7 +186,6 @@ export function DocumentForm({ initialData, onClose, onSuccess }: DocumentFormPr
             />
           </div>
           <div>
-            <label className="block mb-1 text-sm font-medium">Arquivo</label>
             <FileUpload
               value={formData.arquivo_url}
               onChange={(url) => setFormData(prev => ({ ...prev, arquivo_url: url }))}
