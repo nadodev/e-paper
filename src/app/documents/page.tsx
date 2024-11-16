@@ -1,28 +1,62 @@
 "use client"
-import { useState, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import DashboardLayout from '@/components/layout/DashboardLayout'
 import { DocumentTable } from '@/components/Table/DocumentTable'
 import { DocumentForm } from '@/components/Table/DocumentForm'
 import { Button } from '@/components/ui/button'
-import type { Document } from '@/lib/api/contract'
+import type { Document, User } from '@/lib/api/contract'
 import { Plus } from 'lucide-react'
+import { api } from '@/lib/api/client'
 
 export default function DocumentsPage() {
   const [showForm, setShowForm] = useState(false)
   const [editingDocument, setEditingDocument] = useState<Document | null>(null)
-  const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const [documents, setDocuments] = useState<Document[]>([])
+  const [users, setUsers] = useState<User[]>([])
+
+  const fetchDocuments = async () => {
+    try {
+      const response = await api.getDocuments();
+      if (response.status === 200) {
+        setDocuments(response.body);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar documentos:', error)
+    }
+  }
+
+  const fetchUsers = async () => {
+    try {
+      const response = await api.getUsers();
+      if (response.status === 200) {
+        setUsers(response.body);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar usuários:', error)
+    }
+  }
+
+  useEffect(() => {
+    fetchDocuments()
+    fetchUsers()
+  }, [])
 
   const handleEdit = (document: Document) => {
     setEditingDocument(document)
     setShowForm(true)
   }
 
-  const handleRefresh = useCallback(() => {
-    setRefreshTrigger(prev => prev + 1)
-  }, [])
+  const handleDelete = async (id: string) => {
+    try {
+      await api.deleteDocument({ params: { id } });
+      fetchDocuments();
+    } catch (error) {
+      console.error('Erro ao deletar documento:', error);
+    }
+  }
 
   const handleSuccess = () => {
-    handleRefresh()
+    fetchDocuments();
     setShowForm(false)
     setEditingDocument(null)
   }
@@ -47,7 +81,9 @@ export default function DocumentsPage() {
         <div className="w-full pb-6 mx-auto bg-white border-0 rounded-lg max-w-screen-2xl pt-[47px]">
           <DocumentTable
             onEdit={handleEdit}
-            key={refreshTrigger}
+            onDelete={handleDelete}
+            documents={documents}
+            users={users}
           />
         </div>
 

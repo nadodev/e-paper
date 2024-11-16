@@ -13,6 +13,14 @@ const UserSchema = z.object({
   updatedAt: z.date(),
 });
 
+// Renomeie a interface User para UserInterface
+export interface UserInterface {
+  id: string;
+  name: string;
+  email: string;
+  // Adicione outras propriedades conforme necessário
+}
+
 export const CreateUserSchema = z.object({
   nome: z.string().min(1, 'Nome é obrigatório'),
   email: z.string().email('Email inválido'),
@@ -126,4 +134,5 @@ export const contract = c.router({
   },
 });
 
-export type AppContract = typeof contract; 
+export type AppContract = typeof contract;
+ 

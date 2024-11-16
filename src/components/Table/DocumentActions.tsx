@@ -1,15 +1,15 @@
 "use client"
 import { useState, useRef, useEffect } from 'react'
-import { MoreHorizontal, Edit, Trash2, FileText } from 'lucide-react'
+import { MoreHorizontal, Edit, Trash2, Eye } from 'lucide-react'
 import { Button } from '../ui/button'
 import type { Document } from '@/lib/api/contract'
 import { cn } from '@/lib/utils'
+import { DocumentViewer } from '../DocumentViewer'
 
 interface DocumentActionsProps {
   document: Document
   onEdit: (document: Document) => void
   onDelete: (id: string) => void
-  onView: (document: Document) => void
   isFirstRow?: boolean
 }
 
@@ -17,10 +17,9 @@ export function DocumentActions({
   document, 
   onEdit, 
   onDelete, 
-  onView, 
-  isFirstRow = false 
 }: DocumentActionsProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [showViewer, setShowViewer] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
 
@@ -34,6 +33,11 @@ export function DocumentActions({
     window.document.addEventListener('mousedown', handleClickOutside)
     return () => window.document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  const handleView = () => {
+    setShowViewer(true)
+    setIsOpen(false)
+  }
 
   return (
     <div className="relative" ref={menuRef}>
@@ -60,21 +64,17 @@ export function DocumentActions({
               "sm:left-1/2 sm:-translate-x-1/2"
             )}
             style={{ 
-            
-                left: 0, 
-                top: 50,
-                transform: 'translate(-100%, -100%)'
+              left: 0, 
+              top: 50,
+              transform: 'translate(-100%, -100%)'
             }}
           >
             <div className="p-1">
               <button
-                onClick={() => {
-                  onView(document)
-                  setIsOpen(false)
-                }}
+                onClick={handleView}
                 className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-gray-100"
               >
-                <FileText className="w-4 h-4 mr-2" />
+                <Eye className="w-4 h-4 mr-2" />
                 Visualizar
               </button>
               <button
@@ -100,6 +100,13 @@ export function DocumentActions({
             </div>
           </div>
         </>
+      )}
+
+      {showViewer && (
+        <DocumentViewer 
+          document={document} 
+          onClose={() => setShowViewer(false)} 
+        />
       )}
     </div>
   )
