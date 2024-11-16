@@ -27,25 +27,35 @@ const router = createNextRoute(contract, {
       const documents = await prisma.document.findMany({
         orderBy: { data_criacao: 'desc' },
       });
-      return { status: 200, body: documents };
+  
+      // Converte os valores Decimal para number
+      const formattedDocuments = documents.map(doc => ({
+        ...doc,
+        valor_total_tributos: doc.valor_total_tributos.toNumber(),
+        valor_liquido: doc.valor_liquido.toNumber(),
+      }));
+  
+      return { status: 200, body: formattedDocuments };
     } catch (err) {
       console.error('Error fetching documents:', err);
       return { status: 500, body: { error: 'Failed to fetch documents' } };
     }
   },
+  
 
   createDocument: async ({ body }) => {
     try {
+      // Valida os dados
       const validatedData = CreateDocumentSchema.parse(body);
-
+  
       const existingDocument = await prisma.document.findUnique({
         where: { codigo: validatedData.codigo },
       });
-
+  
       if (existingDocument) {
         return { status: 400, body: { error: 'Código já cadastrado' } };
       }
-
+  
       const document = await prisma.document.create({
         data: {
           codigo: validatedData.codigo,
@@ -57,8 +67,15 @@ const router = createNextRoute(contract, {
           ultima_atualizacao: new Date(),
         },
       });
-
-      return { status: 201, body: document };
+  
+      // Converte os valores de Decimal para number antes de retornar
+      const formattedDocument = {
+        ...document,
+        valor_total_tributos: document.valor_total_tributos.toNumber(),
+        valor_liquido: document.valor_liquido.toNumber(),
+      };
+  
+      return { status: 201, body: formattedDocument };
     } catch (err) {
       if (err instanceof z.ZodError) {
         return { status: 400, body: { error: err.errors[0].message } };
@@ -67,6 +84,7 @@ const router = createNextRoute(contract, {
       return { status: 500, body: { error: 'Failed to create document' } };
     }
   },
+  
 
   updateDocument: async () => {
     return { status: 405, body: { error: 'Method not allowed in this route' } };
