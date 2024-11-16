@@ -2,50 +2,29 @@
 import { useState } from 'react'
 import { Filter, X } from 'lucide-react'
 import { Button } from '../ui/button'
-import { Input } from '../ui/input'
-import { formatCurrency, parseCurrency } from '@/lib/utils/format'
 import type { User } from '@/lib/api/contract'
+import { Input } from '../ui/input'
 
 interface DocumentFiltersProps {
   users: User[]
   onFilter: (filters: FilterValues) => void
   onClear: () => void
+  initialFilters: FilterValues
 }
 
 export interface FilterValues {
+  emitente?: string
   dateStart?: string
   dateEnd?: string
-  emitente?: string
   valorTotalMin?: number
   valorTotalMax?: number
   valorLiquidoMin?: number
   valorLiquidoMax?: number
 }
 
-export function DocumentFilters({ users, onFilter, onClear }: DocumentFiltersProps) {
+export function DocumentFilters({ users, onFilter, onClear, initialFilters }: DocumentFiltersProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [filters, setFilters] = useState<FilterValues>({})
-  const [formattedValues, setFormattedValues] = useState({
-    valorTotalMin: 'R$ 0,00',
-    valorTotalMax: 'R$ 0,00',
-    valorLiquidoMin: 'R$ 0,00',
-    valorLiquidoMax: 'R$ 0,00',
-  })
-
-  const handleValorChange = (campo: keyof typeof formattedValues, valor: string) => {
-    const numeroLimpo = parseCurrency(valor)
-    
-    setFormattedValues(prev => ({
-      ...prev,
-      [campo]: formatCurrency(numeroLimpo),
-    }))
-
-    const filterKey = campo.replace('formatted', '') as keyof FilterValues
-    setFilters(prev => ({
-      ...prev,
-      [filterKey]: numeroLimpo,
-    }))
-  }
+  const [filters, setFilters] = useState<FilterValues>(initialFilters || {})
 
   const handleApplyFilters = () => {
     onFilter(filters)
@@ -54,12 +33,6 @@ export function DocumentFilters({ users, onFilter, onClear }: DocumentFiltersPro
 
   const handleClearFilters = () => {
     setFilters({})
-    setFormattedValues({
-      valorTotalMin: 'R$ 0,00',
-      valorTotalMax: 'R$ 0,00',
-      valorLiquidoMin: 'R$ 0,00',
-      valorLiquidoMax: 'R$ 0,00',
-    })
     onClear()
     setIsOpen(false)
   }
@@ -70,28 +43,45 @@ export function DocumentFilters({ users, onFilter, onClear }: DocumentFiltersPro
         variant="outline"
         size="sm"
         onClick={() => setIsOpen(true)}
-        className="h-10 w-10 p-0"
+        className="text-sm p-[9.5px] gap-2"
       >
-        <Filter className="h-4 w-4" />
+        <Filter className="w-4 h-4" />
+        Filtrar
       </Button>
 
       {isOpen && (
-        <div className="fixed inset-y-0 right-0 z-50 w-96 bg-white shadow-lg">
+        <div className="fixed inset-y-0 right-0 z-50 bg-white shadow-lg w-96">
           <div className="flex items-center justify-between p-4 border-b">
             <h3 className="text-lg font-medium">Filtros</h3>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setIsOpen(false)}
-              className="h-8 w-8 p-0"
+              className="w-8 h-8 p-0"
             >
-              <X className="h-4 w-4" />
+              <X className="w-4 h-4" />
             </Button>
           </div>
 
           <div className="p-4 space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Período de Criação</label>
+              <label className="block mb-1 text-sm font-medium">Emitente</label>
+              <select
+                className="w-full p-2 border rounded-md"
+                value={filters.emitente}
+                onChange={(e) => setFilters(prev => ({ ...prev, emitente: e.target.value }))}
+              >
+                <option value="">Todos</option>
+                {users.map((user) => (
+                  <option key={user.id} value={user.nome}>
+                    {user.nome}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block mb-1 text-sm font-medium">Data de Criação</label>
               <div className="grid grid-cols-2 gap-2">
                 <Input
                   type="date"
@@ -107,63 +97,42 @@ export function DocumentFilters({ users, onFilter, onClear }: DocumentFiltersPro
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Emitente</label>
-              <select
-                className="w-full rounded-md border p-2"
-                value={filters.emitente}
-                onChange={(e) => setFilters(prev => ({ ...prev, emitente: e.target.value }))}
-              >
-                <option value="">Todos</option>
-                {users.map((user) => (
-                  <option key={user.id} value={user.nome}>
-                    {user.nome}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">Valor Total Tributos</label>
+              <label className="block mb-1 text-sm font-medium">Valor Total</label>
               <div className="grid grid-cols-2 gap-2">
                 <Input
                   placeholder="Mínimo"
-                  value={formattedValues.valorTotalMin}
-                  onChange={(e) => handleValorChange('valorTotalMin', e.target.value)}
+                  value={filters.valorTotalMin?.toString() || ''}
+                  onChange={(e) => setFilters(prev => ({ ...prev, valorTotalMin: Number(e.target.value) }))}
                 />
                 <Input
                   placeholder="Máximo"
-                  value={formattedValues.valorTotalMax}
-                  onChange={(e) => handleValorChange('valorTotalMax', e.target.value)}
+                  value={filters.valorTotalMax?.toString() || ''}
+                  onChange={(e) => setFilters(prev => ({ ...prev, valorTotalMax: Number(e.target.value) }))}
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Valor Líquido</label>
+              <label className="block mb-1 text-sm font-medium">Valor Líquido</label>
               <div className="grid grid-cols-2 gap-2">
                 <Input
                   placeholder="Mínimo"
-                  value={formattedValues.valorLiquidoMin}
-                  onChange={(e) => handleValorChange('valorLiquidoMin', e.target.value)}
+                  value={filters.valorLiquidoMin?.toString() || ''}
+                  onChange={(e) => setFilters(prev => ({ ...prev, valorLiquidoMin: Number(e.target.value) }))}
                 />
                 <Input
                   placeholder="Máximo"
-                  value={formattedValues.valorLiquidoMax}
-                  onChange={(e) => handleValorChange('valorLiquidoMax', e.target.value)}
+                  value={filters.valorLiquidoMax?.toString() || ''}
+                  onChange={(e) => setFilters(prev => ({ ...prev, valorLiquidoMax: Number(e.target.value) }))}
                 />
               </div>
             </div>
 
-            <div className="flex justify-end space-x-2 pt-4 border-t">
-              <Button
-                variant="outline"
-                onClick={handleClearFilters}
-              >
+            <div className="flex justify-end">
+              <Button onClick={handleClearFilters} variant="outline" className="mr-2">
                 Limpar
               </Button>
-              <Button
-                onClick={handleApplyFilters}
-              >
+              <Button onClick={handleApplyFilters}>
                 Aplicar
               </Button>
             </div>

@@ -5,8 +5,8 @@ import { Button } from '../ui/button'
 import { api } from '@/lib/api/client'
 import type { CreateDocumentInput, Document, User } from '@/lib/api/contract'
 import { formatCurrency, parseCurrency } from '@/lib/utils/format'
-import { FileText, X } from 'lucide-react'
 import { FileUpload } from '../ui/FileUpload'
+import { toast } from 'sonner'
 
 interface DocumentFormProps {
   initialData?: Document | null
@@ -111,6 +111,9 @@ export function DocumentForm({ initialData, onClose, onSuccess }: DocumentFormPr
       }
 
       if (response.status === 200 || response.status === 201) {
+    
+        const message = initialData ? 'Documento atualizado com sucesso' : 'Documento criado com sucesso';
+        toast.success(message);
         onSuccess()
         onClose()
       } else {
@@ -128,19 +131,19 @@ export function DocumentForm({ initialData, onClose, onSuccess }: DocumentFormPr
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-lg font-bold mb-4">
+    <div className="z-[400] fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="w-full max-w-lg p-6 bg-white rounded-lg">
+        <h2 className="mb-4 text-lg font-bold">
           {initialData ? 'Editar Documento' : 'Novo Documento'}
         </h2>
         {error && (
-          <div className="bg-red-100 text-red-700 p-2 rounded-md mb-4">
+          <div className="p-2 mb-4 text-red-700 bg-red-100 rounded-md">
             {error}
           </div>
         )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Código</label>
+            <label className="block mb-1 text-sm font-medium">Código</label>
             <Input
               required
               value={formData.codigo}
@@ -149,10 +152,10 @@ export function DocumentForm({ initialData, onClose, onSuccess }: DocumentFormPr
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Emitente</label>
+            <label className="block mb-1 text-sm font-medium">Emitente</label>
             <select
               required
-              className="w-full rounded-md border p-2"
+              className="w-full p-2 border rounded-md"
               value={formData.emitente}
               onChange={(e) => setFormData(prev => ({ ...prev, emitente: e.target.value }))}
             >
@@ -165,7 +168,7 @@ export function DocumentForm({ initialData, onClose, onSuccess }: DocumentFormPr
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Valor Total Tributos</label>
+            <label className="block mb-1 text-sm font-medium">Valor Total Tributos</label>
             <Input
               required
               value={valoresFormatados.valor_total_tributos}
@@ -174,7 +177,7 @@ export function DocumentForm({ initialData, onClose, onSuccess }: DocumentFormPr
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Valor Líquido</label>
+            <label className="block mb-1 text-sm font-medium">Valor Líquido</label>
             <Input
               required
               value={valoresFormatados.valor_liquido}
@@ -183,7 +186,6 @@ export function DocumentForm({ initialData, onClose, onSuccess }: DocumentFormPr
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Arquivo</label>
             <FileUpload
               value={formData.arquivo_url}
               onChange={(url) => setFormData(prev => ({ ...prev, arquivo_url: url }))}
