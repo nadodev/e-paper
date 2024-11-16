@@ -233,10 +233,10 @@ export function DocumentTable({ onEdit }: DocumentTableProps) {
   return (
     <div className="w-full space-y-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center justify-end w-full gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full">
           <Input
             placeholder="Buscar por código ou emitente..."
-            className="max-w-sm"
+            className="w-full sm:max-w-sm"
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
           />
@@ -250,16 +250,16 @@ export function DocumentTable({ onEdit }: DocumentTableProps) {
             <Button 
               variant="outline"
               onClick={handleDeleteSelected}
-              className="text-red-600 border-red-200 whitespace-nowrap bg-red-50 hover:bg-red-100 hover:text-red-700"
+              className="whitespace-nowrap bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border-red-200"
             >
-              Excluir Selecionados ({selectedDocuments.size})
+              Excluir ({selectedDocuments.size})
             </Button>
           )}
         </div>
       </div>
 
-      <div className="w-full border rounded-md">
-        <div className="w-full overflow-x-auto">
+      <div className="w-full border rounded-md overflow-auto">
+        <div className="min-w-[800px]">
           <Table>
             <TableHeader>
               <TableRow>
@@ -268,19 +268,19 @@ export function DocumentTable({ onEdit }: DocumentTableProps) {
                     type="checkbox"
                     checked={selectedDocuments.size === filteredData.length && filteredData.length > 0}
                     onChange={toggleSelectAll}
-                    className="border-gray-300 rounded"
+                    className="rounded border-gray-300"
                   />
                 </TableHead>
-                <TableHead>Código</TableHead>
-                <TableHead>Emitente</TableHead>
-                <TableHead>Valor Total Tributos</TableHead>
-                <TableHead>Valor Líquido</TableHead>
-                <TableHead>Data Criação</TableHead>
-                <TableHead className="w-[50px]"></TableHead>
+                <TableHead className="w-[120px]">Código</TableHead>
+                <TableHead className="w-[200px]">Emitente</TableHead>
+                <TableHead className="w-[150px]">Valor Total</TableHead>
+                <TableHead className="w-[150px]">Valor Líquido</TableHead>
+                <TableHead className="w-[120px]">Data Criação</TableHead>
+                <TableHead className="w-[100px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedData.map((item) => (
+              {paginatedData.map((item, index) => (
                 <TableRow key={item.id}>
                   <TableCell>
                     <input
@@ -303,6 +303,7 @@ export function DocumentTable({ onEdit }: DocumentTableProps) {
                       onEdit={onEdit}
                       onDelete={handleDelete}
                       onView={handleView}
+                      isFirstRow={index === 0}
                     />
                   </TableCell>
                 </TableRow>
@@ -310,54 +311,33 @@ export function DocumentTable({ onEdit }: DocumentTableProps) {
           
             </TableBody>
           </Table>
-          <div className="flex p-2 font-medium bg-gray-50 gap-[90px] pl-[50px] border-t border-t-[#E5E7EB]">
-                <div className="text-right">
-                   <div className='flex flex-col items-start text-[#3A424E] text-md'>
-                  <span className='block text-xs text-neutral-500'>
-                      Total:
-                    </span>
-                    <p>
-                    {summary.totalDocuments} documentos
-                    </p>
-                 </div>
-                </div>
-                <div>
-                    <div className='flex flex-col items-start text-[#3A424E] text-md'>
-                    <span className='block text-xs text-neutral-500'>
-                     nº de emitentes:
-                    </span>
-                    <p>
-                    {summary.uniqueEmitentes} emitentes
-                    </p>
-                  </div>
-                </div>
-                <div>
-                  <div className='flex flex-col items-start text-[#3A424E] text-md'>
-                <span className='block text-xs text-neutral-500'>
-                    Total Tributos:
-                  </span>
-                  <p>
-                  {formatCurrency(summary.totalTributos)}
-                  </p>
-                 </div>
-                </div>
-                <div>
-                  <div className='flex flex-col items-start text-[#3A424E] text-md'>
-                  <span className='block text-xs text-neutral-500'>
-                    Total Tributos:
-                  </span>
-                    {formatCurrency(summary.totalLiquido)}
-                  </div>
-                </div>
-              </div>
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-gray-500">
-          Mostrando {startIndex + 1} a {Math.min(startIndex + ITEMS_PER_PAGE, filteredData.length)} de {filteredData.length} resultados
+      <div className=" grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg hidden md:grid">
+        <div className="text-sm">
+          <span className="block text-gray-500">Total:</span>
+          <strong>{summary.totalDocuments} documentos</strong>
         </div>
-        <div className="flex gap-2">
+        <div className="text-sm">
+          <span className="block text-gray-500">Emitentes:</span>
+          <strong>{summary.uniqueEmitentes}</strong>
+        </div>
+        <div className="text-sm">
+          <span className="block text-gray-500">Total Tributos:</span>
+          <strong>{formatCurrency(summary.totalTributos)}</strong>
+        </div>
+        <div className="text-sm">
+          <span className="block text-gray-500">Total Líquido:</span>
+          <strong>{formatCurrency(summary.totalLiquido)}</strong>
+        </div>
+      </div>
+
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="text-sm text-gray-500 order-2 sm:order-1">
+          Mostrando {startIndex + 1} a {Math.min(startIndex + ITEMS_PER_PAGE, filteredData.length)} de {filteredData.length}
+        </div>
+        <div className="flex gap-2 order-1 sm:order-2">
           <Button
             variant="outline"
             size="sm"
@@ -366,16 +346,18 @@ export function DocumentTable({ onEdit }: DocumentTableProps) {
           >
             Anterior
           </Button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <Button
-              key={page}
-              variant={page === currentPage ? "default" : "outline"}
-              size="sm"
-              onClick={() => handlePageChange(page)}
-            >
-              {page}
-            </Button>
-          ))}
+          <div className="hidden sm:flex gap-2">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <Button
+                key={page}
+                variant={page === currentPage ? "default" : "outline"}
+                size="sm"
+                onClick={() => handlePageChange(page)}
+              >
+                {page}
+              </Button>
+            ))}
+          </div>
           <Button
             variant="outline"
             size="sm"
