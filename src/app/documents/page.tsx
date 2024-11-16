@@ -5,6 +5,7 @@ import { DocumentTable } from '@/components/Table/DocumentTable'
 import { DocumentForm } from '@/components/Table/DocumentForm'
 import { Button } from '@/components/ui/button'
 import type { Document } from '@/lib/api/contract'
+import { Plus } from 'lucide-react'
 
 export default function DocumentsPage() {
   const [showForm, setShowForm] = useState(false)
@@ -28,15 +29,20 @@ export default function DocumentsPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Documentos</h1>
-          <Button onClick={() => setShowForm(true)}>
-            Adicionar Documento
+      <div className="space-y-4">
+        <div className="flex items-center justify-between w-full pb-6 mx-auto border-b max-w-screen-2xl border-b-neutral-200">
+          <div className='flex flex-col'>
+            <h3 className="text-2xl font-bold text-neutral-700 ">Documentos</h3>
+            <p className='text-sm text-neutral-500'>Crie, gerencie e visualize os documentos</p>
+          </div>
+          <Button onClick={() => setShowForm(true)}
+            className='text-white bg-[#05C151] hover:bg-primary-600 py-[9.5px] text-sm font-medium gap-2' 
+            >
+              <Plus size={16}  color='#fff'/>
+             Novo documento
           </Button>
         </div>
-
-        <div className="p-6 bg-white rounded-lg border">
+        <div className="w-full pb-6 mx-auto bg-white border-0 rounded-lg max-w-screen-2xl pt-[47px]">
           <DocumentTable
             onEdit={handleEdit}
             key={refreshTrigger}

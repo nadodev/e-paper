@@ -71,28 +71,29 @@ export function DocumentFilters({ users, onFilter, onClear, initialFilters }: Do
         variant="outline"
         size="sm"
         onClick={() => setIsOpen(true)}
-        className="h-10 w-10 p-0"
+        className="text-sm p-[9.5px] gap-2"
       >
-        <Filter className="h-4 w-4" />
+        <Filter className="w-4 h-4" />
+        Filtrar
       </Button>
 
       {isOpen && (
-        <div className="fixed inset-y-0 right-0 z-50 w-96 bg-white shadow-lg">
+        <div className="fixed inset-y-0 right-0 z-50 bg-white shadow-lg w-96">
           <div className="flex items-center justify-between p-4 border-b">
             <h3 className="text-lg font-medium">Filtros</h3>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setIsOpen(false)}
-              className="h-8 w-8 p-0"
+              className="w-8 h-8 p-0"
             >
-              <X className="h-4 w-4" />
+              <X className="w-4 h-4" />
             </Button>
           </div>
 
           <div className="p-4 space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Período de Criação</label>
+              <label className="block mb-1 text-sm font-medium">Período de Criação</label>
               <div className="grid grid-cols-2 gap-2">
                 <Input
                   type="date"
@@ -108,9 +109,9 @@ export function DocumentFilters({ users, onFilter, onClear, initialFilters }: Do
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Emitente</label>
+              <label className="block mb-1 text-sm font-medium">Emitente</label>
               <select
-                className="w-full rounded-md border p-2"
+                className="w-full p-2 border rounded-md"
                 value={filters.emitente}
                 onChange={(e) => setFilters(prev => ({ ...prev, emitente: e.target.value }))}
               >
@@ -124,7 +125,7 @@ export function DocumentFilters({ users, onFilter, onClear, initialFilters }: Do
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Valor Total Tributos</label>
+              <label className="block mb-1 text-sm font-medium">Valor Total Tributos</label>
               <div className="grid grid-cols-2 gap-2">
                 <Input
                   placeholder="Mínimo"
@@ -140,7 +141,7 @@ export function DocumentFilters({ users, onFilter, onClear, initialFilters }: Do
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Valor Líquido</label>
+              <label className="block mb-1 text-sm font-medium">Valor Líquido</label>
               <div className="grid grid-cols-2 gap-2">
                 <Input
                   placeholder="Mínimo"
@@ -155,7 +156,7 @@ export function DocumentFilters({ users, onFilter, onClear, initialFilters }: Do
               </div>
             </div>
 
-            <div className="flex justify-end space-x-2 pt-4 border-t">
+            <div className="flex justify-end pt-4 space-x-2 border-t">
               <Button
                 variant="outline"
                 onClick={handleClearFilters}

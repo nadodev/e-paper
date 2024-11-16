@@ -73,10 +73,10 @@ export function FileUpload({ value, onChange, onError, loading }: FileUploadProp
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 ">
       <div
         className={cn(
-          "relative border-2 border-dashed rounded-lg p-6 transition-colors",
+          "relative border-2 border-dashed rounded-lg p-6 transition-colors bg-gray-50",
           isDragging ? "border-primary bg-primary/5" : "border-gray-300",
           loading && "opacity-50 cursor-not-allowed"
         )}
@@ -93,19 +93,22 @@ export function FileUpload({ value, onChange, onError, loading }: FileUploadProp
           className="hidden"
           disabled={loading}
         />
-        <div className="flex flex-col items-center justify-center space-y-2 text-center">
-          <Upload className="h-8 w-8 text-gray-400" />
+        <div className="flex flex-col items-center justify-center space-y-2 text-center ">
+          <Upload className="w-8 h-8 text-gray-400" />
           <div className="text-sm text-gray-600">
-            <span className="font-semibold">Clique para upload</span> ou arraste e solte
+            Arraste e solte aqui ou selecione o arquivo para upload
+          </div>
+          <div className="p-2 text-xs text-gray-500 bg-white border border-gray-100 rounded">
+            Procure e selecione um arquivo
           </div>
           <div className="text-xs text-gray-500">
-            PDF, JPEG ou PNG (max. 5MB)
+          Tamanho max:  10MB
           </div>
         </div>
       </div>
 
       {value && (
-        <div className="flex items-center justify-between p-2 bg-gray-50 rounded-md">
+        <div className="flex items-center justify-between p-3 mt-4 border border-gray-200 rounded-md bg-gray-50 ">
           <a
             href={value}
             target="_blank"
@@ -113,7 +116,7 @@ export function FileUpload({ value, onChange, onError, loading }: FileUploadProp
             className="flex items-center text-sm text-blue-600 hover:text-blue-700"
             onClick={(e) => e.stopPropagation()}
           >
-            <FileText className="mr-2 h-4 w-4" />
+            <FileText className="w-4 h-4 mr-2" />
             Ver arquivo
           </a>
           <button
@@ -124,7 +127,7 @@ export function FileUpload({ value, onChange, onError, loading }: FileUploadProp
             }}
             className="text-gray-500 hover:text-gray-700"
           >
-            <X className="h-4 w-4" />
+            <X className="w-4 h-4" />
           </button>
         </div>
       )}
