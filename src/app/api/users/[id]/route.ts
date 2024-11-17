@@ -17,42 +17,67 @@ const router = createNextRoute(contract, {
   updateUser: async ({ params, body }) => {
     try {
       const validatedData = CreateUserSchema.parse(body);
+  
+      // Verifica se o usuário existe no banco de dados
       const existingUser = await prisma.user.findUnique({
         where: { id: params.id },
       });
-
+  
       if (!existingUser) {
         return { status: 404, body: { error: 'Usuário não encontrado' } };
       }
-
+  
+      // Verifica se o email está sendo usado por outro usuário
       const emailInUse = await prisma.user.findFirst({
-        where: { 
+        where: {
           email: validatedData.email,
-          NOT: { id: params.id }
+          NOT: { id: params.id },
         },
       });
-
+  
       if (emailInUse) {
         return { status: 400, body: { error: 'Email já cadastrado' } };
       }
-
-      const user = await prisma.user.update({
+  
+      // Atualiza os dados do usuário no banco de dados
+      const updatedUser = await prisma.user.update({
         where: { id: params.id },
         data: {
           ...validatedData,
-          updatedAt: new Date(),
+          updatedAt: new Date(), // Atualiza a data de modificação
         },
       });
-
-      return { status: 200, body: user };
+  
+      // Retorna o usuário atualizado com status de sucesso
+      return {
+        status: 200,
+        body: {
+          id: updatedUser.id,
+          nome: updatedUser.nome,
+          email: updatedUser.email,
+          status: updatedUser.status as "ativo" | "inativo",
+          createdAt: updatedUser.createdAt,
+          updatedAt: updatedUser.updatedAt,
+        },
+      };
     } catch (err) {
+      // Tratamento específico para erros do Zod
       if (err instanceof z.ZodError) {
-        return { status: 400, body: { error: err.errors[0].message } };
+        console.warn('Validation error:', err.errors);
+        return {
+          status: 400,
+          body: { error: err.errors.map(e => e.message).join('; ') },
+        };
       }
+  
+      // Log de erro genérico para diagnóstico
       console.error('Error updating user:', err);
-      return { status: 500, body: { error: 'Failed to update user' } };
+  
+      // Retorna erro genérico para o cliente
+      return { status: 500, body: { error: 'Erro ao atualizar o usuário' } };
     }
   },
+  
 
   deleteUser: async ({ params }) => {
     try {
