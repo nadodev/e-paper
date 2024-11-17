@@ -11,42 +11,85 @@ const router = createNextRoute(contract, {
       const users = await prisma.user.findMany({
         orderBy: { createdAt: 'desc' },
       });
-      return { status: 200, body: users };
+  
+      // Mapeia os usuários para garantir que o status seja do tipo esperado
+      const formattedUsers = users.map(user => ({
+        id: user.id,
+        nome: user.nome,
+        email: user.email,
+        status: user.status as "ativo" | "inativo", // Garante compatibilidade com o contrato
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      }));
+  
+      return {
+        status: 200,
+        body: formattedUsers,
+      };
     } catch (err) {
       console.error('Error fetching users:', err);
-      return { status: 500, body: { error: 'Failed to fetch users' } };
+      return {
+        status: 500,
+        body: { error: 'Erro ao buscar os usuários' },
+      };
     }
   },
-
+  
+  
   createUser: async ({ body }) => {
     try {
+      // Valida os dados enviados no corpo da requisição
       const validatedData = CreateUserSchema.parse(body);
-
+  
+      // Verifica se já existe um usuário com o email fornecido
       const existingUser = await prisma.user.findUnique({
         where: { email: validatedData.email },
       });
-
+  
       if (existingUser) {
         return { status: 400, body: { error: 'Email já cadastrado' } };
       }
-
-      const user = await prisma.user.create({
+  
+      // Cria um novo usuário no banco de dados
+      const newUser = await prisma.user.create({
         data: {
           ...validatedData,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
       });
-
-      return { status: 201, body: user };
+  
+      // Formata o usuário criado para garantir compatibilidade com o contrato
+      const formattedUser = {
+        id: newUser.id,
+        nome: newUser.nome,
+        email: newUser.email,
+        status: newUser.status as "ativo" | "inativo", // Garantimos que o tipo está correto
+        createdAt: newUser.createdAt,
+        updatedAt: newUser.updatedAt,
+      };
+  
+      return {
+        status: 201,
+        body: formattedUser,
+      };
     } catch (err) {
+      // Tratamento específico para erros do Zod
       if (err instanceof z.ZodError) {
-        return { status: 400, body: { error: err.errors[0].message } };
+        console.warn('Validation error:', err.errors);
+        return {
+          status: 400,
+          body: { error: err.errors.map(e => e.message).join('; ') },
+        };
       }
+  
+      // Loga o erro e retorna um status de erro genérico
       console.error('Error creating user:', err);
-      return { status: 500, body: { error: 'Failed to create user' } };
+      return { status: 500, body: { error: 'Erro ao criar o usuário' } };
     }
   },
+  
+  
 
   updateUser: async () => {
     return { status: 405, body: { error: 'Method not allowed in this route' } };
