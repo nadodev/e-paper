@@ -1,5 +1,5 @@
 -- CreateTable
-CREATE TABLE `Document` (
+CREATE TABLE `document` (
     `id` VARCHAR(191) NOT NULL,
     `codigo` VARCHAR(191) NOT NULL,
     `emitente` VARCHAR(191) NOT NULL,
