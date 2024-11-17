@@ -81,6 +81,8 @@ const router = createNextRoute(contract, {
   },
   deleteDocument: async ({ params }) => {
     try {
+
+      
       const existingDocument = await prisma.document.findUnique({
         where: { id: params.id },
       });
@@ -90,6 +92,7 @@ const router = createNextRoute(contract, {
       }
 
       await prisma.document.delete({
+        
         where: { id: params.id },
       });
 
