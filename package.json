@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "vercel-build": "npm install --force && next build ",
+    "vercel-build": "npm install --force && next build && prisma migrate deploy --schema=./schema.prisma",
     "postinstall": "prisma generate"
 
   },
